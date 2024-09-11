@@ -1,11 +1,11 @@
-#version: '3.9'
+#version: "3.9"
 
 services:
   app:
-    build: 
+    build:
       context: .
       args:
-        - DEV=ture
+        - DEV=true
     ports:
       - "8000:8000"
     volumes:
