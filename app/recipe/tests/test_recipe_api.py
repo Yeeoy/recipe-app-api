@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 from core.models import Recipe, Tag
 from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 
-RECIPE_URL = reverse('recipe:recipe-list')  # 食谱列表的URL
+RECIPES_URL = reverse('recipe:recipe-list')  # 食谱列表的URL
 
 
 def detail_url(recipe_id):
@@ -36,18 +36,18 @@ def create_user(**params):
     return get_user_model().objects.create_user(**params)  # 创建用户
 
 
-class PublicRecipeApiTests(TestCase):
+class PublicRecipeAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()  # 初始化API客户端
 
     def test_auth_required(self):
-        res = self.client.get(RECIPE_URL)  # 未认证用户访问食谱列表
+        res = self.client.get(RECIPES_URL)  # 未认证用户访问食谱列表
 
         # 断言返回401未认证
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateRecipeApiTests(TestCase):
+class PrivateRecipeAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()  # 初始化API客户端
         self.user = create_user(
@@ -60,7 +60,7 @@ class PrivateRecipeApiTests(TestCase):
         create_recipe(user=self.user)  # 创建食谱
         create_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)  # 获取食谱列表
+        res = self.client.get(RECIPES_URL)  # 获取食谱列表
 
         recipes = Recipe.objects.all().order_by('-id')  # 查询所有食谱并按id降序排列
         serializer = RecipeSerializer(recipes, many=True)  # 序列化食谱列表
@@ -77,7 +77,7 @@ class PrivateRecipeApiTests(TestCase):
         create_recipe(user=other_user)  # 创建其他用户的食谱
         create_recipe(user=self.user)  # 创建当前用户的食谱
 
-        res = self.client.get(RECIPE_URL)  # 获取食谱列表
+        res = self.client.get(RECIPES_URL)  # 获取食谱列表
 
         recipes = Recipe.objects.filter(user=self.user)  # 查询当前用户的食谱
         serializer = RecipeSerializer(recipes, many=True)  # 序列化食谱列表
@@ -101,7 +101,7 @@ class PrivateRecipeApiTests(TestCase):
             'price': Decimal('5.99'),
         }
 
-        res = self.client.post(RECIPE_URL, payload)  # 创建食谱
+        res = self.client.post(RECIPES_URL, payload)  # 创建食谱
         # 断言返回201创建成功
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipe = Recipe.objects.get(id=res.data['id'])  # 获取创建的食谱
@@ -201,9 +201,9 @@ class PrivateRecipeApiTests(TestCase):
             'title': 'Avocado lime cheesecake',
             'time_minutes': 60,
             'price': Decimal('20.00'),
-            'tags': [{'vegan', 'dessert'}, {'gluten-free', 'dessert'}]
+            'tags': [{'name': 'Thai'}, {'name': 'Dinner'}],
         }
-        res = self.client.post(RECIPE_URL, payload, format='json')
+        res = self.client.post(RECIPES_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
@@ -229,7 +229,7 @@ class PrivateRecipeApiTests(TestCase):
             ]
         }
 
-        res = self.client.post(RECIPE_URL, payload, format='json')
+        res = self.client.post(RECIPES_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
