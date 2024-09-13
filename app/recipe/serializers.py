@@ -79,7 +79,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 class RecipeDetailSerializer(RecipeSerializer):
     class Meta(RecipeSerializer.Meta):
         # 详细序列化器包含描述字段
-        fields = RecipeSerializer.Meta.fields + ['description','image']
+        fields = RecipeSerializer.Meta.fields + ['description', 'image']
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
